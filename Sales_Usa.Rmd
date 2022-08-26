@@ -5,6 +5,8 @@ date: '2022-08-20'
 output: rmdformats::readthedown
 ---
 
+#Este será mi metadata, aqui harpe mis cambios
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
@@ -181,6 +183,7 @@ Table: Definición de variables
 
 
  *Análisis exploratorio de datos*
+
 
 ## Análisis de Ventas
 
