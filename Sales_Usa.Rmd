@@ -1,17 +1,20 @@
 ---
-title: "Sales_Usa"
+title: "Trabajo Final de Estadística"
 author: "Delsy"
 date: '2022-08-20'
 output: rmdformats::readthedown
 ---
 
-#Este será mi metadata, aqui harpe mis cambios
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r include=FALSE}
+
+#AQUI SE INCLUYEN LIS PAQUETES A INSTALAR PARA QUE FUNCIONE EL RMD  
+
+  ifelse(require(MASS)==T, "Cargado", install.packages("readxl"))
   ifelse(require(MASS)==T, "Cargado", install.packages("MASS"))
   ifelse(require(viridis)==T, "Cargado", install.packages("viridis"))
   ifelse(require(tables)==T, "Cargado", install.packages("tables"))
@@ -25,7 +28,6 @@ knitr::opts_chunk$set(echo = TRUE)
   ifelse(require(dataMaid)==T, "Cargado", install.packages("dataMaid"))
   ifelse(require(tidylog)==T, "Cargado", install.packages("tidylog"))
   ifelse(require(stargazer)==T, "Cargado", install.packages("stargazer"))
-  
   ifelse(require(summarytools)==T, "Cargado", install.packages("summarytools"))
   ifelse(require(metan)==T, "Cargado", install.packages("metan"))
   ifelse(require(DT)==T, "Cargado", install.packages("DT"))
@@ -35,7 +37,8 @@ knitr::opts_chunk$set(echo = TRUE)
   #install.packages("rriskDistributions")
   
   
-
+#AQUI SE INCLUYEN LAS LIBRERIAS
+  
   library(MASS)
   library(viridis)
   library(tables)
@@ -73,99 +76,123 @@ knitr::opts_chunk$set(echo = TRUE)
   library(dynlm)
   library(MASS)
   library(ggfortify)
+  library(readxl)
+  
 ```
 
 
 ```{r include=FALSE}
-library(readxl)
-getwd()
-usaStore <- read.csv("D:/TFE/sales.csv", header = TRUE, sep = ";")
+
+usaStore <- read.csv("D:/EAE Master Big Data/Estadistica/TrabajoFinal/sales.csv", header = TRUE, sep = ";")
 str(usaStore)
 ```
 
 
 
-```{r}
+```{r include=FALSE}
+
+#Convertimos las variables cant_ordened y age a numerico
 
 usaStore$cant_ordened <- as.numeric(usaStore$cant_ordened)
+
 usaStore$age<- as.numeric(usaStore$age)
-```
 
-```{r}
-str(usaStore)
 ```
 
 
-```{r}
+```{r include=FALSE}
 
 sapply(usaStore, function(x) sum(is.na(x))) #Conteo de todas las columnas que tienen na
 
 ```
 
 
-```{r}
+```{r include=FALSE}
+
+#eliminamos los valores nulos en cant_ordened
+
 usaStore <- usaStore[!is.na(usaStore$cant_ordened),]
 
 ```
 
 
 
+<img
+src=https://i.ibb.co/fkHSwd8/usaSales.jpg>
 
-<img 
-src=https://i.ibb.co/mhybZQ2/Indias-Store2.png>
+## Caso de Análisis
 
-##  Caso de Análisis
+*El conjunto de datos de Ventas en línea de SalesUsa es un registro de las ventas de diferentes productos, mercancias, artefactos electrónicos en diferentes estados. Dado que una gran parte de las personas que tiene accesos a Internet se están cambiando a las compras en línea, los grandes minoristas están buscando activamente formas de aumentar sus ganancias.*
 
-*El conjunto de datos de Ventas en línea de Sales USA. trata sobre las ventas de diferentes productos, varias mercancías y productos electrónicos en diferentes estados. Dado que una gran parte de las personas que tienen acceso a Internet se están cambiando a las compras en línea, los grandes minoristas están buscando activamente formas de aumentar sus ganancias. El análisis de ventas es una de esas técnicas clave utilizadas por los grandes minoristas para aumentar las ventas al comprender el comportamiento y los patrones de compra de los clientes. El análisis de la cesta de la compra examina colecciones de artículos para encontrar relaciones entre los artículos que van juntos dentro del contexto empresarial.
-*
+*Por esa razón presentamos los objetivos principales*
 
-> Nuestra tarea es analizar los datos de ventas e identificar áreas débiles y oportunidades para que SALES USA impulse el crecimiento del negocio.
+
+> Analizar de la cesta de la compra y encontrar la relaciones entre los articulos más relevantes
+
+> Identificar las oportunidades de mejora en nuestro servicio de ventas en linea.
+
+> Identifica los puntos fuertes en base al historial sistema de ventas de Sales USA. 
+
+
+*Para iniciar con en análisis vamos a comenzar con la identificación de variables*
+
 
 ### Definición de variables
-Se cuenta con una tabla de datos de 35 variables
+
+
+*Se cuenta con una tabla de datos de 35 variables*
+
 
 Table: Definición de variables
 
- **N°**| **Variable** |  **Tipo de variable ** | 
--------| -------------| ----------------------|
-*1* |*order_id*| *Cualitativa Nominal*|
-*2* |*order_date* | *Cuantitativa discreta*|
-*3* |*status* | *Cualitativa ordinal*|
-*4* |*item_id* | *Calitativa Nominal*|
-*5* |*sku* | *Cualitativa Nominal*|
-*6* |*cant_ordened* | *Cuantitativa Discreta*|
-*7* |*price* | *Cuantitativa Continua*|
-*8* |*value* | *Cuantitativa Continua*|
-*9* |*discount_amount* | *Cuantitativa Continua*|
-*10* |*total* | *Cuantitativa Continua*|
-*11* |*category* | *Cualitativa Nominal*|
-*12* |*payment_method* | *Cualitativa Nominal*|
-*13* |*bi_st* | *Cualitativa Nominal*|
-*14* |*cust_id* | *Cualitativa Nominal*|
-*15* |*year* | *Cuantitativa discreta*|
-*16* |*month* | *Cuantitativa discreta*|
-*17* |*ref_num* | *Cuantitativa discreta*|
-*18* |*Name Prefix* | *Cualitativa ordinal*|
-*19* |*First Name* | *Cualitativa nominal*|
-*20* |*Middle Initial* | **|
-*21* |*Last Name* | *Cualitativa nominal*|
-*22* |*Gender* | *Cualitativa nominal/binaria*|
-*23* |*age* | *Cuantitativa discreta*|
-*24* |*full_name* | *Cualitativa nominal*|
-*25* |*E Mail* | *Cualitativa nominal*|
-*26* |*Customer Since* | *Cuantitativa discreta*|
-*27* |*SSN* | *Cualitativa nominal*|
-*28* |*Phone No.* | *Cualitativa nominal*|
-*29* |*Place Name* | *Cualitativa nominal*|
-*30* |*County* | *Cualitativa nominal*|
-*31* |*City* | *Cualitativa nominal*|
-*32* |*State* | *Cualitativa nominal*|
-*33* |*Zip* | *Cualitativa nominal*|
-*34* |*Region* | *Cualitativa nominal*|
-*35* |*User Name* | *Cualitativa nominal*|
+
+ **N°**| **Variable** |**Descripción de la variable**|**Tipo de variable ** | 
+-------| -------------|------------------------------|----------------------|
+*1* |*order_id*|*Identificador de la orden* |*Cualitativa Nominal*|
+*2* |*order_date*|*Fecha de la orden* |*Cuantitativa discreta*|
+*3* |*status* | *Estatus del orden* |*Cualitativa ordinal*|
+*4* |*item_id* | *Identificador del item* |*Calitativa Nominal*|
+*5* |*sku* | *Descripción del item*   | *Cualitativa Nominal*|
+*6* |*cant_ordened*|*Cantidad de items adquiridos en la orden*| *Cuantitativa Discreta*|
+*7* |*price* |*Precio unitario del item*| *Cuantitativa Continua*|
+*8* |*value* |*Precio general del los items adquiridos* |*Cuantitativa Continua*|
+*9* |*discount_amount* | *Descuento total de los items* | *Cuantitativa Continua*|
+*10* |*total* |*Precio total de los items* |*Cuantitativa Continua*|
+*11* |*category* |*Categoria al cual pertenece la orden*|*Cualitativa Nominal*|
+*12* |*payment_method*|*Método de pago*|*Cualitativa Nominal*|
+*13* |*bi_st* |*No se tiene registro* |*Cualitativa Nominal*|
+*14* |*cust_id* |*ID del cliente o customer id*| *Cualitativa Nominal*|
+*15* |*year* |*Año de la compra* | *Cuantitativa discreta*|
+*16* |*month* | *Mes de la compra* | *Cuantitativa discreta*|
+*17* |*ref_num* |*Número de referencia* | *Cuantitativa discreta*|
+*18* |*Name Prefix* | *Prefijo del nombre* | *Cualitativa ordinal*|
+*19* |*First Name* | *Primer nombre* |*Cualitativa nominal*|
+*20* |*Middle Initial* |*Sin detalle del campo*| *Cualitativa nominal*|
+*21* |*Last Name* |*Apellido del cliente*| *Cualitativa nominal*|
+*22* |*Gender* |*Genero del cliente*|*Cualitativa nominal/binaria*|
+*23* |*age* |*Edad del cliente* | *Cuantitativa discreta*|
+*24* |*full_name* |*Nombre completo del cliente* |*Cualitativa nominal*|
+*25* |*E Mail* |*Correo electrónico del cliente* | *Cualitativa nominal*|
+*26* |*Customer Since*|*Fecha de registro del cliente*| *Cuantitativa discreta*|
+*27* |*SSN* | *Número de seguro social* | *Cualitativa nominal*|
+*28* |*Phone No.* | *Número telefónico del cliente* | *Cualitativa nominal*|
+*29* |*Place Name* | *Nombre del lugar de residencia* | *Cualitativa nominal*|
+*30* |*County* | *País* | *Cualitativa nominal*|
+*31* |*City* | *Ciudad* | *Cualitativa nominal*|
+*32* |*State* | *Estado* | *Cualitativa nominal*|
+*33* |*Zip* |*Código Postal* | *Cualitativa nominal*|
+*34* |*Region* | *Región* | *Cualitativa nominal*|
+*35* |*User Name* |*Nombre del usuario*| *Cualitativa nominal*|
 
 
-## **Primera Parte**
+```{r}
+#Se puede eliminar la columna full name o las dos columnas previas llamadas first name and last name
+#Podemos hallar un buen gráfico de la fecha de inicio de fidelización de los clientes
+#
+```
+
+
+## **Análisis Descriptivo**
 
 **Para el planteamiento del caso USA Store se analizará las ventas generadas ** 
 
@@ -182,19 +209,19 @@ Table: Definición de variables
 * ¿Que genero tiene mayores ventas?
 
 
- *Análisis exploratorio de datos*
-
-
-## Análisis de Ventas
-
 ### 1.- Ventas Por Región
+
+
+> * ¿Qué región/estados es la más rentable?
+
+Vamos a comenzar con el análisis filtrando las ventas por región en nuestra base de datos
 
 ```{r}
 totalVentas<-aggregate(x=usaStore$total,by=list(usaStore$Region),FUN=sum)
 datatable(totalVentas[order(totalVentas$x,decreasing = TRUE),])
 ```
 
-*Como podemos observar la región en donde se realizaron mayores ventas fue "South" y donde se realizaron menores ventas fue "Northeast"*
+> *Como podemos observar la región en donde se realizaron mayores ventas fue "South" y donde se realizaron menores ventas fue "Northeast"*
 
 ```{r }
 ventasRegion <- c(0.38,0.27,0.18,0.17)
@@ -216,16 +243,24 @@ legend("topright", c("South", "Midwest", "West", "Northeast"), cex = 0.9,
 ```
 
 
-### 2.- Ventas Por  Categoría de producto
+### 2.- Ventas por Categoría de producto
+
+Ahora lo que procederemos a conocer es:
+
+>* ¿Qué categorías generan más pérdidas en las ventas?
 
 Para poder entender mejor cuales son las categorias de productos donde se tienen mayores ganancias recurriremos a un análisis a través de diagramas de barras
 
 
-```{r}
+```{r }
  
+#eliminamos los valores nulos en category
+
+usaStore <- usaStore[!(usaStore$category==""),]
 
 #Listar todas las categorias que tiene nuestra data
-unique(usaStore$category) #En total tenemos 16 categorias incluido uno en vacio que debe ser sustituido por N.A.
+
+unique(usaStore$category) 
 categoria <- usaStore$category
 ventas <- usaStore$total
 ventas_categoria <- data.frame(categoria,ventas)
@@ -235,22 +270,30 @@ diagramaCat_Venta
 
 ```
 
-```{r}
+```{r }
 diag_cp<- diagramaCat_Venta[order(diagramaCat_Venta$x,decreasing = TRUE),]
-barplot(diag_cp$x, main ="Ventas por Categoria de producto", names.arg=c("Mobiles & Tablets","Appliances","Entertainment","Others","Computing","Women's Fashion","Men's Fashion","Beauty & Grooming","Superstore","Home & Living","Health & Sports","Kids & Baby","Soghaat","School & Education","Books"," "), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
+barplot(diag_cp$x, main ="Ventas por Categoria de producto", names.arg=c("Mobiles & Tablets","Appliances","Entertainment","Others","Computing","Women's Fashion","Men's Fashion","Beauty & Grooming","Superstore","Home & Living","Health & Sports","Kids & Baby","Soghaat","School & Education","Books"), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5)
 ```
 
 
-Por el diagrama podemos saber que las categorías de productos "Mobiles & Tablets", "Appliances" y "Entertainment" son lo que tienen mayores ventas. Asimismo, no debemos descartar que no se tiene la categoria "otros" y quen se situa como la 4 categoria mas vendida, lo cual no podemos determinar a que productos hace referencia.
+Por el diagrama podemos saber que las categorías de productos *"Mobiles & Tablets"*, *"Appliances"* y *"Entertainment"* son lo que tienen mayores ventas. Asimismo, no debemos descartar que no se tiene la categoria *"otros"*, esta se situa como la cuarta categoría mas vendida. No obstante, no podemos determinar a que productos hace referencia.
 
 ### 3.- Ventas Por Status
 
+Ahora lo que procederemos a conocer es:
+
+>* ¿Cuales son los Status por ventas?
+
+Para ello vamos a realizar un diagrama de barras donde podamos mostrar cuales son los estatus más comunes de nuestro registro de ventas
+
 ```{r}
+
 Ventas_Status <- usaStore$status
 
 ```
 
 ```{r}
+
 Ventas_Status1 <-  aggregate(x=ventas_categoria$ventas, by=list(Ventas_Status),FUN = sum)
 datatable(Ventas_Status1[order(Ventas_Status1$x,decreasing = TRUE),])
 
@@ -259,36 +302,56 @@ datatable(Ventas_Status1[order(Ventas_Status1$x,decreasing = TRUE),])
 
 ```{r}
 diag_Status<- Ventas_Status1[order(Ventas_Status1$x,decreasing = TRUE),]
-barplot(diag_Status$x, main ="Ventas por Status", names.arg=c("canceled","complete","received","order_refunded","refund","cod","paid","closed","holded","pending","processing","payment_review","pending_paypal"," "), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
+barplot(diag_Status$x, main ="Ventas por Status", names.arg=c("canceled","complete","received","order_refunded","refund","cod","paid","closed","holded","pending","processing","payment_review","pending_paypal" ), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5)
 ```
 
-*En el diagrama de Ventas por Status podemos constatar que el status canceled y complete contienen las mayores ventas.*
+
+Por el diagrama podemos saber que el status *"Cancelado"* , *Completado* y *"Recibido"* son los más frecuentes. Asimismo, podemos agregar que los de estatus "cancelado" representan a las ventas completamente pagadas, las "completado" aquellas que fueron completadas no obstante el pago sigue pendiente y por "order_refunded" aquellas que fueron reenbolsadas
+
+
 
 ### 4.- Ventas Por Metodo de Pago
 
-```{r}
+Ahora lo que procederemos a conocer es:
+
+> * ¿Que tipo de pago es el mas usado?
+
+Para ello vamos a realizar un diagrama de barras donde podamos mostrar cual es el tipo de pago más común de nuestro registro de ventas
+
+```{r }
 tipoPago<-aggregate(x=usaStore$total,by=list(usaStore$payment_method), FUN=sum)
 datatable(tipoPago[order(tipoPago$x,decreasing = TRUE),])
 ```
 
-```{r}
+```{r }
 diag_MedPag<- tipoPago[order(tipoPago$x,decreasing = TRUE),]
-barplot(diag_MedPag$x, main ="Ventas por Medio de Pago", names.arg=c("Easypay","easypay_voucher","bankalfalah","Payaxis","cod","jazzvoucher","Easypay_MA","jazzwallet","customercredit","apg","mcblite","cashatdoorstep","financesettlement"," "), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5,cey.names=0.5)
+barplot(diag_MedPag$x, main ="Ventas por Medio de Pago", names.arg=c("Easypay","easypay_voucher","bankalfalah","Payaxis","cod","jazzvoucher","Easypay_MA","jazzwallet","customercredit","apg","mcblite","cashatdoorstep","financesettlement" ), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5)
 ```
+
+
+Interpretando el diagrama conocemos que el método de pago mas usados son *"Easypay"*,*Easypay_voucher*, *bankalfalh* y *Payaxis*.
+
 
 ### 5.- Ventas Por Genero
-```{r}
+
+Por otro lado, queremos conocer lo siguiente:
+
+
+> * ¿Que genero(hombres o mujeres) tiene mayores ventas?
+
+
+Por lo tanto vamos a agrupar las ventas realizadas por hombres y mujeres y encontramos que :
+
+
+```{r include = FALSE} 
 totalgen <-usaStore$Gender
-
-```
-
-
-```{r}
 Venta_genero<-aggregate(x=usaStore$total,by=list(usaStore$Gender), FUN=sum)
 datatable(Venta_genero[order(Venta_genero$x,decreasing = TRUE),])
+
 ```
 
 ```{r }
+
 ventasGenero <- c(0.51,0.49)
 etiquetasG <- c("Femenino", "Masculino")
 pctg <- round(ventasGenero/sum(ventasGenero)*100)
@@ -306,51 +369,32 @@ pie(ventasGenero,labels = ventasGenero,
 legend("topright", c("Femenino", "Masculino"), cex = 0.9,
        fill = rainbow(length(ventasGenero)))
 ```
+
+
 ##Segunda parte de analisís
+
+
 Realizaremos los siguientes analisis con las 3 categorias con mayores ventas :
 
- -
- - 
- -
-
+ - Mobiles & Tablets
+ - Appliaances
+ - Entertainment
 
 ```{r}
 
 mobiletablets<- usaStore%>%group_by(total)%>%filter(category %in% c("Mobiles & Tablets"))
-
-mobiletablets
-```
-
-
-
-```{r}
 P_mobiletablets<-aggregate(x=mobiletablets$total,by=list(mobiletablets$sku), FUN=sum)
-datatable(P_mobiletablets[order(P_mobiletablets$x,decreasing = TRUE),])
+#datatable(P_mobiletablets[order(P_mobiletablets$x,decreasing = TRUE),])
 ```
-
-```{r}
-P1_mobiletablets<- usaStore%>%group_by(total)%>%filter(sku %in% c("MATSAM59DB757FB47A2"))
-
-P1_mobiletablets
-```
-
-
-
-
-
 
 ```{r}
 Appliances<- usaStore%>%group_by(total)%>%filter(category %in% c("Appliances"))
 
-Appliances
 ```
-
-
 
 ```{r}
 Entertainment<- usaStore%>%group_by(total)%>%filter(category %in% c("Entertainment"))
 
-Entertainment
 ```
 
 
@@ -364,11 +408,11 @@ Entertainment
 ```{r}
 
 UsaStoreCo <- usaStore
-UsaStoreCo
+#UsaStoreCo
 UsaStoreCo <- select(usaStore, "cant_ordened","price","discount_amount","total","age")
 
 
-UsaStoreCo
+#UsaStoreCo
 str(UsaStoreCo)
 ```
 
