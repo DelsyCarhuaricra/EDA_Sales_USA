@@ -453,6 +453,7 @@ corrplot(M, method="circle")
 # Ajustes de Distribución
 
 
+## Variable Cantidad (de productos de categoría "Mobiles & Tablets") :
 
 Deseo conocer cual será el pronostico de ventas de la categoría de ventas mas vendida
 
@@ -475,8 +476,8 @@ cantidad_usaStore_tablets <- usaStore_Tablet$cant_ordened
 
 #Diagrama de cullen and Frey de cantidades de ventas de tablets and mobiles
 
-descdist(cantidad_usaStore_tablets,discrete = TRUE, boot=1000)
-unique(cantidad_usaStore_tablets)
+descdist(cantidad_usaStore_tablets, boot=1000)
+
 
 #Distribucion Gamma
 fit_gamma  <- fitdist(cantidad_usaStore_tablets, "gamma")
@@ -516,54 +517,7 @@ summary(fit_weillbul)
 
 #--------------------------------------------------------
 
-#Distribucion Poisson
-fit_poisson  <- fitdist(cantidad_usaStore_tablets, "pois")
-summary(fit_poisson)
 
-#Fitting of the distribution ' pois ' by maximum likelihood 
-#Parameters : 
-#Loglikelihood:  -93663.86   AIC:  187329.7   BIC:  187338.8 
-
-
-
-#Distribucion Nbinom
-fit_nbinom <- fitdist(cantidad_usaStore_tablets, "nbinom")
-summary(fir_nbinom)
-
-#Fitting of the distribution ' nbinom ' by maximum likelihood 
-#Parameters : 
-#Loglikelihood:  -93663.87   AIC:  187331.7   BIC:  187349.8 
-#Correlation matrix:
-#            size          mu
-#size 1.00000e+00 2.12387e-07
-#mu   2.12387e-07 1.00000e+00
-
-
-
-#Distribución Normal
-fit_norm <- fitdist(cantidad_usaStore_tablets, "norm")
-summary(fit_norm)
-
-#Fitting of the distribution ' norm ' by maximum likelihood 
-#Parameters : 
-#Loglikelihood:  -99767.97   AIC:  199539.9   BIC:  199558 
-#Correlation matrix:
-#              mean            sd
-#mean  1.000000e+00 -9.254532e-11
-#sd   -9.254532e-11  1.000000e+00
-
-
-
-
-```
-
-```{r}
-
-#Distribucion Gamma
-fit_gamma  <- fitdist(usaStore_Tablet$total,"lnorm")
-summary(fit_gamma)
-
-summary(usaStore_Tablet$total)
 ```
 
 
@@ -590,8 +544,6 @@ Generación de la muestra:
 
 ```{r }
 
-estimacion_cantidad <- rbinom(360, size =1.00000e+00 ,prob = 2.12387e-07)
-
 
 estimacion_cantidad <- rlnorm(360, meanlog = 1.000000e+00, sdlog = 5.121939e-12 )
 summary(estimacion_cantidad)
@@ -602,10 +554,82 @@ Cálculo de los intervalos de confianza
 
 ```{r }
 mean(estimacion_cantidad)-sd(estimacion_cantidad)
-mean(estimacion_venta)+sd(estimacion_venta)
 ```
 
-> **Conclusión**: Después de obtener la estimación de la variable Ventas para el año siguiente y el intervalo de confianza, concluimos que el año que viene las ventas de la compañia deberían fluctuar entre 920.6971 y 2053.442
+> **Conclusión**: Después de obtener la estimación de la variable cantidad para el año siguiente y el intervalo de confianza, concluimos que el año que viene el promedio de cantidad solicitada por ordenes de tables es de dos unidades por cantidad
+
+
+## Ventas según tipo de Pago :
+
+
+```{r}
+
+usaStore
+usaStore <- usaStore[!(usaStore$payment_method==""),]
+unique(usaStore$payment_method)
+ventas_categoria <- data.frame(,ventas)
+diagramaCat_Venta <-  aggregate(x=ventas_categoria$ventas, by=list(ventas_categoria$categoria),FUN = sum)
+diagramaCat_Venta[order(diagramaCat_Venta$x,decreasing = TRUE),] %>% top_n(1) #Como pondemos ver la categoría mas vendida es mobiles and tables
+
+#Por lo tanto haré un análisis de los registros de venta de las ventas de categoria "mobiles and tables"
+
+
+usaStore_Tablet <- usaStore %>% filter(usaStore$category=="Mobiles & Tablets")
+
+summary(usaStore_Tablet$total)
+
+cantidad_usaStore_tablets <- usaStore_Tablet$cant_ordened
+
+#Diagrama de cullen and Frey de cantidades de ventas de tablets and mobiles
+
+descdist(cantidad_usaStore_tablets, boot=1000)
+
+
+#Distribucion Gamma
+fit_gamma  <- fitdist(cantidad_usaStore_tablets, "gamma")
+summary(fit_gamma)
+
+#Parameters : 
+#Loglikelihood:  -72715.63   AIC:  145435.3   BIC:  145453.3 
+#Correlation matrix:
+#         shape     rate
+#shape 1.000000 0.964706
+#rate  0.964706 1.000000
+
+
+
+#Distribucion Lognormal
+fit_lognormal <- fitdist(cantidad_usaStore_tablets, "lnorm")
+summary(fit_lognormal)
+
+#Loglikelihood:  -66732.52   AIC:  133469   BIC:  133487.1 
+#Correlation matrix:
+#             meanlog        sdlog
+#meanlog 1.000000e+00 5.121939e-12
+#sdlog   5.121939e-12 1.000000e+00
+
+
+#Distribución Weillbul
+fit_weillbul <- fitdist(cantidad_usaStore_tablets, "weibull")
+summary(fit_weillbul)
+
+#Fitting of the distribution ' weibull ' by maximum likelihood 
+#Parameters : 
+#:  -88102.85   AIC:  176209.7   BIC:  176227.8 
+#Correlation matrix:
+#          shape     scale
+#shape 1.0000000 0.3338363
+#scale 0.3338363 1.0000000
+
+#--------------------------------------------------------
+
+
+
+
+```
+
+
+
 
 
 
