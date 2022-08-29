@@ -32,6 +32,7 @@ knitr::opts_chunk$set(echo = TRUE)
   ifelse(require(metan)==T, "Cargado", install.packages("metan"))
   ifelse(require(DT)==T, "Cargado", install.packages("DT"))
   ifelse(require(expss)==T, "Cargado", install.packages("expss"))
+  ifelse(require(corrplot)==T, "Cargado", install.packages("corrplot"))
   #install.packages("descr")
   #install.packages("summarytools")
   #install.packages("rriskDistributions")
@@ -77,6 +78,7 @@ knitr::opts_chunk$set(echo = TRUE)
   library(MASS)
   library(ggfortify)
   library(readxl)
+  library(corrplot)
   
 ```
 
@@ -382,21 +384,38 @@ Realizaremos los siguientes analisis con las 3 categorias con mayores ventas :
 
 ```{r}
 
-mobiletablets<- usaStore%>%group_by(total)%>%filter(category %in% c("Mobiles & Tablets"))
-P_mobiletablets<-aggregate(x=mobiletablets$total,by=list(mobiletablets$sku), FUN=sum)
-#datatable(P_mobiletablets[order(P_mobiletablets$x,decreasing = TRUE),])
+mobiletablets <- usaStore%>%group_by(total)%>%filter(category %in% c("Mobiles & Tablets"))
+P_mobiletablets <- aggregate(x=mobiletablets$total,by=list(mobiletablets$sku), FUN=sum)
+P_mobiletablets <- P_mobiletablets[order(P_mobiletablets$x,decreasing = TRUE),]
+#Obtengo el top 10
+P_mobiletables <- P_mobiletablets %>% top_n(10)
+#Lo ingreso en una tabla
+datatable(P_mobiletables)
+
 ```
 
 ```{r}
-Appliances<- usaStore%>%group_by(total)%>%filter(category %in% c("Appliances"))
+
+appliances<- usaStore%>%group_by(total)%>%filter(category %in% c("Appliances"))
+appliances <- aggregate(x=appliances$total,by=list(appliances$sku), FUN=sum)
+appliances <- appliances[order(appliances$x,decreasing = TRUE),]
+#Obtengo el top 10
+appliances <- appliances %>% top_n(10)
+#Lo ingreso en una tabla
+datatable(appliances)
+
 
 ```
 
 ```{r}
 Entertainment<- usaStore%>%group_by(total)%>%filter(category %in% c("Entertainment"))
-
+Entertainment <- aggregate(x=Entertainment$total,by=list(Entertainment$sku), FUN=sum)
+Entertainment <- Entertainment[order(Entertainment$x,decreasing = TRUE),]
+#Obtengo el top 10
+Entertainment <- Entertainment %>% top_n(10)
+#Lo ingreso en una tabla
+datatable(Entertainment)
 ```
-
 
 
 
@@ -407,8 +426,6 @@ Entertainment<- usaStore%>%group_by(total)%>%filter(category %in% c("Entertainme
 
 ```{r}
 
-UsaStoreCo <- usaStore
-#UsaStoreCo
 UsaStoreCo <- select(usaStore, "cant_ordened","price","discount_amount","total","age")
 
 
@@ -425,12 +442,16 @@ head(round(M,2))
 
 
 ```{r}
-library(corrplot)
+
 corrplot(M, method="circle")
 ```
 
 
 #Correlación menor a cero: Si la correlación es menor a cero, significa que es negativa, es decir, que las variables se relacionan inversamente. Cuando el valor de alguna variable es alto, el valor de la otra variable es bajo. Mientras más próximo se encuentre a -1, más clara será la covariación extrema.
+
+
+# Ajustes de Distribución
+
 
 
 
