@@ -458,7 +458,7 @@ corrplot(M, method="circle")
 Deseo conocer cual será el pronostico de ventas de la categoría de ventas mas vendida
 
 ```{r}
-usaStore
+#usaStore
 usaStore <- usaStore[!(usaStore$category==""),]
 unique(usaStore$category)
 ventas_categoria <- data.frame(categoria,ventas)
@@ -548,6 +548,8 @@ Generación de la muestra:
 estimacion_cantidad <- rlnorm(360, meanlog = 1.000000e+00, sdlog = 5.121939e-12 )
 summary(estimacion_cantidad)
 
+
+
 ```
 
 Cálculo de los intervalos de confianza
@@ -561,65 +563,70 @@ mean(estimacion_cantidad)-sd(estimacion_cantidad)
 
 ## Ventas según tipo de Pago :
 
+Sabemos que el tipo de pago más usado es "Easypay" por lo tanto realizaremos la estimación en base a este metodo de pago. Cual es el promedio de ingresos a recibir para los próximos 360 días 
+
+```{r }
+
+easypay_usaSales <- usaStore %>% filter(usaStore$payment_method=="Easypay")
+#Filtrar por tipo de pago
+easypay_usaSales <- replace(easypay_usaSales$total, easypay_usaSales$total==0, 1 )
+
+easypay_usaSales <- na.omit(easypay_usaSales)
+
+summary(easypay_usaSales)
+
+
+
+descdist(easypay_usaSales, boot=1000)
+
+
+new.function <- function(a) ifelse(a<1,1,a)
+easypay_usaSales <- new.function(easypay_usaSales)
+
+summary(easypay_usaSales)
+```
+
 
 ```{r}
 
-usaStore
-usaStore <- usaStore[!(usaStore$payment_method==""),]
-unique(usaStore$payment_method)
-ventas_categoria <- data.frame(,ventas)
-diagramaCat_Venta <-  aggregate(x=ventas_categoria$ventas, by=list(ventas_categoria$categoria),FUN = sum)
-diagramaCat_Venta[order(diagramaCat_Venta$x,decreasing = TRUE),] %>% top_n(1) #Como pondemos ver la categoría mas vendida es mobiles and tables
-
-#Por lo tanto haré un análisis de los registros de venta de las ventas de categoria "mobiles and tables"
-
-
-usaStore_Tablet <- usaStore %>% filter(usaStore$category=="Mobiles & Tablets")
-
-summary(usaStore_Tablet$total)
-
-cantidad_usaStore_tablets <- usaStore_Tablet$cant_ordened
-
-#Diagrama de cullen and Frey de cantidades de ventas de tablets and mobiles
-
-descdist(cantidad_usaStore_tablets, boot=1000)
-
 
 #Distribucion Gamma
-fit_gamma  <- fitdist(cantidad_usaStore_tablets, "gamma")
+fit_gamma  <- fitdist(easypay_usaSales/1000, "gamma")
 summary(fit_gamma)
 
+
+#Explanation why i'm using /1000 in fitdist #https://stackoverflow.com/questions/53557022/error-code-100-fitting-exp-distribution-using-fitdist-in-r
+#Fitting of the distribution ' gamma ' by maximum likelihood 
 #Parameters : 
-#Loglikelihood:  -72715.63   AIC:  145435.3   BIC:  145453.3 
+#Loglikelihood:  -92309.09   AIC:  184622.2   BIC:  184640.5 
 #Correlation matrix:
-#         shape     rate
-#shape 1.000000 0.964706
-#rate  0.964706 1.000000
+#          shape      rate
+#shape 1.0000000 0.6621424
+#rate  0.6621424 1.0000000
 
 
-
-#Distribucion Lognormal
-fit_lognormal <- fitdist(cantidad_usaStore_tablets, "lnorm")
+fit_lognormal <- fitdist(easypay_usaSales/1000, "lnorm")
 summary(fit_lognormal)
 
-#Loglikelihood:  -66732.52   AIC:  133469   BIC:  133487.1 
+#Parameters : 
+#Loglikelihood:  -85848.96   AIC:  171701.9   BIC:  171720.2 
 #Correlation matrix:
-#             meanlog        sdlog
-#meanlog 1.000000e+00 5.121939e-12
-#sdlog   5.121939e-12 1.000000e+00
+#              meanlog         sdlog
+#meanlog  1.000000e+00 -9.250091e-11
+#sdlog   -9.250091e-11  1.000000e+00
+
 
 
 #Distribución Weillbul
-fit_weillbul <- fitdist(cantidad_usaStore_tablets, "weibull")
+fit_weillbul <- fitdist(easypay_usaSales/1000, "weibull")
 summary(fit_weillbul)
 
-#Fitting of the distribution ' weibull ' by maximum likelihood 
 #Parameters : 
-#:  -88102.85   AIC:  176209.7   BIC:  176227.8 
+#Loglikelihood:  -570742.1   AIC:  1141488   BIC:  1141507 
 #Correlation matrix:
 #          shape     scale
-#shape 1.0000000 0.3338363
-#scale 0.3338363 1.0000000
+#shape 1.0000000 0.3311968
+#scale 0.3311968 1.0000000
 
 #--------------------------------------------------------
 
@@ -630,6 +637,44 @@ summary(fit_weillbul)
 
 
 
+Ahora procedemos a comparar las AIC de las distribuciones probables:
+
+
++---------------------------+-------------------------+
+| Tipo de distribución      | AIC obtenido            | 
++===========================+=========================+
+| Gamma                     | 184622.2                |
++---------------------------+-------------------------+
+| Lognormal                 | 1134353                 |
++---------------------------+-------------------------+
+| Weillbul                  | 1141488                 |
++---------------------------+-------------------------+
+
+
+
+> **Conclusión**: Teniendo en cuenta el gráfico de Cullen y Frey así como el criterio del menor AIC, podemos decir que la variable venta sigue una distribución Lognormal
+
+En este momento, decidimos hacer una estimación de la variable cantidad para el año siguiente de los productos de categoría "Mobiles & Tablets". Para ello, vamos a considerar una muestra de 360 días y los parámetros de la distribución log normal
+
+Generación de la muestra:
+
+```{r }
+
+
+estimacion_total <- rlnorm(360, meanlog = 1.000000e+00, sdlog = -9.250091e-11 )
+summary(estimacion_total)
+
+
+
+```
+
+Cálculo de los intervalos de confianza
+
+```{r }
+mean(estimacion_cantidad)-sd(estimacion_cantidad)
+```
+
+> **Conclusión**: Después de obtener la estimación de la variable cantidad para el año siguiente y el intervalo de confianza, concluimos que el año que viene el promedio de cantidad solicitada por ordenes de tables es de dos unidades por cantidad
 
 
 
