@@ -453,7 +453,7 @@ corrplot(M, method="circle")
 # Ajustes de Distribución
 
 
-## Variable Cantidad (de productos de categoría "Mobiles & Tablets") :
+## Ventas según categoría
 
 Deseo conocer cual será el pronostico de ventas de la categoría de ventas mas vendida
 
