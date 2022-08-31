@@ -84,11 +84,13 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
+
 ```{r include=FALSE}
 #No olvidarse de eliminar las filas nulas desde el excel para que la limpieza esté completa
-L01 <- "D:/EAE Master Big Data/Estadistica/TrabajoFinal/"
-Destino <- "D:/EAE Master Big Data/Estadistica/TrabajoFinal/csvlimpio/"
-usaStore <- read.csv(paste(L01,"sales.csv",sep=""), header = TRUE, sep = ";")
+L01 <- "D:/TFE/"
+Destino <- "D:/TFE/EDA_of_Sales_USA/"
+usaStore <- read.csv(paste(L01, "sales.csv", sep  = ""), header = TRUE, sep = ";")
+View(usaStore)
 
 ```
 
@@ -198,7 +200,7 @@ usaStore <- usaStore[!is.na(usaStore$User.Name),]
 ```{r}
 
 #Para guardar la data limpia
-write.csv(usaStore, paste(Destino,"sales.csv",sep = ""))
+write.csv(usaStore, paste(Destino,"clean_sales.csv",sep = ""))
 
 
 ```
