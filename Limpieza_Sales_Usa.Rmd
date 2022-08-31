@@ -1,0 +1,205 @@
+---
+title: "Sales_Usa_Limpieza"
+output: html_document
+date: "2022-08-29"
+---
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include=FALSE}
+
+#AQUI SE INCLUYEN LIS PAQUETES A INSTALAR PARA QUE FUNCIONE EL RMD  
+
+  ifelse(require(MASS)==T, "Cargado", install.packages("readxl"))
+  ifelse(require(MASS)==T, "Cargado", install.packages("MASS"))
+  ifelse(require(viridis)==T, "Cargado", install.packages("viridis"))
+  ifelse(require(tables)==T, "Cargado", install.packages("tables"))
+  ifelse(require(Hmisc)==T, "Cargado", install.packages("Hmisc"))
+  ifelse(require(flextable)==T, "Cargado", install.packages("flextable"))
+  ifelse(require(dplyr)==T, "Cargado", install.packages("dplyr"))
+  ifelse(require(RcmdrMisc)==T, "Cargado", install.packages("RcmdrMisc"))
+  ifelse(require(webr)==T, "Cargado", install.packages("webr"))
+  ifelse(require(knitr)==T, "Cargado", install.packages("knitr"))
+  ifelse(require(kableExtra)==T, "Cargado", install.packages("kableExtra"))
+  ifelse(require(dataMaid)==T, "Cargado", install.packages("dataMaid"))
+  ifelse(require(tidylog)==T, "Cargado", install.packages("tidylog"))
+  ifelse(require(stargazer)==T, "Cargado", install.packages("stargazer"))
+  ifelse(require(summarytools)==T, "Cargado", install.packages("summarytools"))
+  ifelse(require(metan)==T, "Cargado", install.packages("metan"))
+  ifelse(require(DT)==T, "Cargado", install.packages("DT"))
+  ifelse(require(expss)==T, "Cargado", install.packages("expss"))
+  ifelse(require(corrplot)==T, "Cargado", install.packages("corrplot"))
+  
+  #install.packages("descr")
+  #install.packages("summarytools")
+  #install.packages("rriskDistributions")
+  
+  
+#AQUI SE INCLUYEN LAS LIBRERIAS
+  
+  library(MASS)
+  library(viridis)
+  library(tables)
+  library(Hmisc)
+  library(kableExtra)
+  library(knitr,stargazer)
+  library(dataMaid,tidylog)
+  library(reporttools)
+  library(dplyr, warn.conflicts = FALSE)
+  library(reporttools,summarytools)
+  library(metan,dplyr , warn.conflicts = FALSE)
+  library(flextable, DT)
+  library(dplyr)
+  library(RcmdrMisc)
+  library(webr,expss)
+  library(descr)
+  library(summarytools)
+  library(fitdistrplus)
+  library(survival)
+  library(npsurv)
+  library(lsei)
+  library(readr)
+  library(rriskDistributions)
+  library(xts)
+  library(zoo)
+  library(tidyverse)
+  library(lubridate)
+  library(tseries)
+  library(astsa)
+  library(forecast)
+  library(foreign)
+  library(timsac)
+  library(vars)
+  library(mFilter)
+  library(dynlm)
+  library(MASS)
+  library(ggfortify)
+  library(readxl)
+  library(corrplot)
+  
+```
+
+
+```{r include=FALSE}
+#No olvidarse de eliminar las filas nulas desde el excel para que la limpieza esté completa
+L01 <- "D:/EAE Master Big Data/Estadistica/TrabajoFinal/"
+Destino <- "D:/EAE Master Big Data/Estadistica/TrabajoFinal/csvlimpio/"
+usaStore <- read.csv(paste(L01,"sales.csv",sep=""), header = TRUE, sep = ";")
+
+```
+
+
+#FUNCIONES A UTILIZAR PARA LIMPIEZA DE DATOS
+
+```{r}
+#funcion limpiar
+
+funcion_redondeo_uno <-  function(valor) ifelse(valor<1,1,valor) # Metodo para realizar el redondeo
+
+#funcion para reemplazar valores en una cadena
+
+funcion_reemplazar_cadena_2021 <- function(valor) replace(valor,"2021","21")
+
+#funcion para llevar todo a minusculas
+
+funcion_minusculas <- function(valor) tolower(valor)
+
+
+#funcion para homologar campo mes
+
+funcion_modificar_mes <- function(valor){
+  
+  ifelse(nchar(valor)==8,
+         paste(substr(valor,1,4),substr(valor,7,8),sep = "")
+         ,valor)
+  
+}
+
+```
+
+
+
+
+```{r}
+
+
+
+# Para order_id convertir a enteros
+usaStore$order_id <- as.integer(usaStore$order_id)
+
+# Para order_date Convertir a fecha
+usaStore$order_date<-as.Date(usaStore$order_date, "%d/%m/%Y") 
+
+#Para convertir convertir precio 0.0 a 1
+usaStore$price <- funcion_redondeo_uno(usaStore$price)
+
+#Convertir value de 0.0 a 1
+usaStore$value <- funcion_redondeo_uno(usaStore$value)
+
+#Importante mencionar que la variable discount_amount no se le quitará el 0 porque es permisible
+#Convertir value de 0.0 a 1
+usaStore$total <- funcion_redondeo_uno(usaStore$total)
+
+#Para transformar mes 
+#1.- Transformando cadena a minusculas
+usaStore$month <- funcion_minusculas(usaStore$month)
+#2.- Homologando campo mes
+usaStore$month <- funcion_modificar_mes(usaStore$month)
+
+
+#Para transformar edad
+usaStore$age <- as.integer(usaStore$age)
+
+#Para transformar CustomerSince
+usaStore$Customer.Since <- as.Date(usaStore$Customer.Since, "%m/%d/%Y") 
+
+
+
+# Limpiar los NA's
+usaStore <- usaStore[!is.na(usaStore$order_id),]
+usaStore <- usaStore[!is.na(usaStore$order_date),]
+usaStore <- usaStore[!is.na(usaStore$status),]
+usaStore <- usaStore[!is.na(usaStore$sku),]
+usaStore <- usaStore[!is.na(usaStore$cant_ordened),]
+usaStore <- usaStore[!is.na(usaStore$total),]
+usaStore <- usaStore[!is.na(usaStore$category),]
+usaStore <- usaStore[!is.na(usaStore$payment_method),]
+usaStore <- usaStore[!is.na(usaStore$bi_st),]
+usaStore <- usaStore[!is.na(usaStore$cust_id),]
+usaStore <- usaStore[!is.na(usaStore$year),]
+usaStore <- usaStore[!is.na(usaStore$month),]
+usaStore <- usaStore[!is.na(usaStore$ref_num),]
+usaStore <- usaStore[!is.na(usaStore$Name.Prefix),]
+usaStore <- usaStore[!is.na(usaStore$First.Name),]
+usaStore <- usaStore[!is.na(usaStore$Middle.Initial),]
+usaStore <- usaStore[!is.na(usaStore$Last.Name),]
+usaStore <- usaStore[!is.na(usaStore$Gender),]
+usaStore <- usaStore[!is.na(usaStore$full_name),]
+usaStore <- usaStore[!is.na(usaStore$SSN),]
+usaStore <- usaStore[!is.na(usaStore$Phone.No.),]
+usaStore <- usaStore[!is.na(usaStore$Place.Name),]
+usaStore <- usaStore[!is.na(usaStore$County),]
+usaStore <- usaStore[!is.na(usaStore$City),]
+usaStore <- usaStore[!is.na(usaStore$State),]
+usaStore <- usaStore[!is.na(usaStore$Zip),]
+usaStore <- usaStore[!is.na(usaStore$Region),]
+usaStore <- usaStore[!is.na(usaStore$User.Name),]
+
+
+
+```
+
+
+
+```{r}
+
+#Para guardar la data limpia
+write.csv(usaStore, paste(Destino,"sales.csv",sep = ""))
+
+
+```
+
