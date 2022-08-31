@@ -84,9 +84,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r include=FALSE}
-L01 <- "D:/EAE Master Big Data/Estadistica/TrabajoFinal/csvlimpio/"
-usaStore <- read.csv(paste(L01,"sales.csv",sep=""), header = TRUE, sep = ";")
+L02 <- "D:/TFE/EDA_of_Sales_USA/"
+usaStore <- read.csv(paste(L02,"clean_sales.csv",sep=""), header = TRUE, sep = ",")
 str(usaStore)
+View(usaStore)
 ```
 
 
