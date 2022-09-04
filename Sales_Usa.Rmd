@@ -188,12 +188,6 @@ Table: Definición de variables
 *35* |*User Name* |*Nombre del usuario*| *Cualitativa nominal*|
 
 
-```{r}
-#Se puede eliminar la columna full name o las dos columnas previas llamadas first name and last name
-#Podemos hallar un buen gráfico de la fecha de inicio de fidelización de los clientes
-#
-```
-
 
 ## **Análisis Descriptivo**
 
@@ -219,14 +213,14 @@ Table: Definición de variables
 
 Vamos a comenzar con el análisis filtrando las ventas por región en nuestra base de datos
 
-```{r}
+```{r echo=FALSE}
 totalVentas<-aggregate(x=usaStore$total,by=list(usaStore$Region),FUN=sum)
 datatable(totalVentas[order(totalVentas$x,decreasing = TRUE),])
 ```
 
 > *Como podemos observar la región en donde se realizaron mayores ventas fue "South" y donde se realizaron menores ventas fue "Northeast"*
 
-```{r }
+```{r echo=FALSE }
 ventasRegion <- c(0.38,0.27,0.18,0.17)
 etiquetas1 <- c("South", "Midwest", "West", "Northeast")
 pct1 <- round(ventasRegion/sum(ventasRegion)*100)
@@ -235,7 +229,7 @@ etiquetas1 <- paste(ventasRegion,"%",sep="")
 
 ```
 
-```{r }
+```{r echo=FALSE }
 
 pie(ventasRegion,labels = ventasRegion,
     col=rainbow(length(etiquetas1)),
@@ -255,7 +249,7 @@ Ahora lo que procederemos a conocer es:
 Para poder entender mejor cuales son las categorias de productos donde se tienen mayores ganancias recurriremos a un análisis a través de diagramas de barras
 
 
-```{r }
+```{r echo=FALSE }
  
 #eliminamos los valores nulos en category
 
@@ -269,11 +263,18 @@ ventas <- usaStore$total
 ventas_categoria <- data.frame(categoria,ventas)
 diagramaCat_Venta <-  aggregate(x=ventas_categoria$ventas, by=list(ventas_categoria$categoria),FUN = sum)
 datatable(diagramaCat_Venta[order(diagramaCat_Venta$x,decreasing = TRUE),])
-diagramaCat_Venta
+
 
 ```
 
-```{r }
+```{r eval=FALSE, include=FALSE}
+diagramaCat_Venta
+```
+
+
+
+
+```{r echo=FALSE }
 diag_cp<- diagramaCat_Venta[order(diagramaCat_Venta$x,decreasing = TRUE),]
 barplot(diag_cp$x, main ="Ventas por Categoria de producto", names.arg=c("Mobiles & Tablets","Appliances","Entertainment","Others","Computing","Women's Fashion","Men's Fashion","Beauty & Grooming","Superstore","Home & Living","Health & Sports","Kids & Baby","Soghaat","School & Education","Books"), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5)
 ```
@@ -289,13 +290,13 @@ Ahora lo que procederemos a conocer es:
 
 Para ello vamos a realizar un diagrama de barras donde podamos mostrar cuales son los estatus más comunes de nuestro registro de ventas
 
-```{r}
+```{r echo=FALSE}
 
 Ventas_Status <- usaStore$status
 
 ```
 
-```{r}
+```{r echo=FALSE}
 
 Ventas_Status1 <-  aggregate(x=ventas_categoria$ventas, by=list(Ventas_Status),FUN = sum)
 datatable(Ventas_Status1[order(Ventas_Status1$x,decreasing = TRUE),])
@@ -303,7 +304,7 @@ datatable(Ventas_Status1[order(Ventas_Status1$x,decreasing = TRUE),])
 ```
 
 
-```{r}
+```{r echo=FALSE }
 diag_Status<- Ventas_Status1[order(Ventas_Status1$x,decreasing = TRUE),]
 barplot(diag_Status$x, main ="Ventas por Status", names.arg=c("canceled","complete","received","order_refunded","refund","cod","paid","closed","holded","pending","processing","payment_review","pending_paypal" ), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5)
 ```
@@ -321,12 +322,12 @@ Ahora lo que procederemos a conocer es:
 
 Para ello vamos a realizar un diagrama de barras donde podamos mostrar cual es el tipo de pago más común de nuestro registro de ventas
 
-```{r }
+```{r echo=FALSE }
 tipoPago<-aggregate(x=usaStore$total,by=list(usaStore$payment_method), FUN=sum)
 datatable(tipoPago[order(tipoPago$x,decreasing = TRUE),])
 ```
 
-```{r }
+```{r echo=FALSE }
 diag_MedPag<- tipoPago[order(tipoPago$x,decreasing = TRUE),]
 barplot(diag_MedPag$x, main ="Ventas por Medio de Pago", names.arg=c("Easypay","easypay_voucher","bankalfalah","Payaxis","cod","jazzvoucher","Easypay_MA","jazzwallet","customercredit","apg","mcblite","cashatdoorstep","financesettlement" ), col=rainbow(11),space =1,las=3, xlab="",  ylab="ventas",cex.names=0.5)
 ```
@@ -353,7 +354,7 @@ datatable(Venta_genero[order(Venta_genero$x,decreasing = TRUE),])
 
 ```
 
-```{r }
+```{r echo=FALSE }
 
 ventasGenero <- c(0.51,0.49)
 etiquetasG <- c("Femenino", "Masculino")
@@ -363,7 +364,7 @@ etiquetasG <- paste(ventasGenero,"%",sep="")
 
 ```
 
-```{r }
+```{r echo=FALSE }
 
 pie(ventasGenero,labels = ventasGenero,
     col=rainbow(length(etiquetasG)),
@@ -374,7 +375,7 @@ legend("topright", c("Femenino", "Masculino"), cex = 0.9,
 ```
 
 
-##Segunda parte de analisís
+# Análisis Inferencial
 
 
 Realizaremos los siguientes analisis con las 3 categorias con mayores ventas :
@@ -383,7 +384,7 @@ Realizaremos los siguientes analisis con las 3 categorias con mayores ventas :
  - Appliaances
  - Entertainment
 
-```{r}
+```{r echo=FALSE}
 
 mobiletablets <- usaStore%>%group_by(total)%>%filter(category %in% c("Mobiles & Tablets"))
 P_mobiletablets <- aggregate(x=mobiletablets$total,by=list(mobiletablets$sku), FUN=sum)
@@ -421,11 +422,11 @@ datatable(Entertainment)
 
 
 
-### Correlación
+## Correlación
 
 
 
-```{r}
+```{r echo=FALSE}
 
 UsaStoreCo <- select(usaStore, "cant_ordened","price","discount_amount","total","age")
 
@@ -436,13 +437,13 @@ str(UsaStoreCo)
 
 
 
-```{r}
+```{r echo=FALSE }
 M<-cor(UsaStoreCo)
 head(round(M,2))
 ```
 
 
-```{r}
+```{r echo=FALSE }
 
 corrplot(M, method="circle")
 ```
@@ -459,7 +460,7 @@ corrplot(M, method="circle")
 Deseo conocer cual será el pronostico de ventas de la categoría de ventas mas vendida
 
 ```{r}
-#usaStore
+
 usaStore <- usaStore[!(usaStore$category==""),]
 
 #Por lo tanto haré un análisis de los registros de venta de las ventas de categoria "mobiles and tables"
@@ -473,9 +474,10 @@ venta_usaStore_tablets <- usaStore_Tablet$total
 #Diagrama de cullen and Frey de cantidades de ventas de tablets and mobiles
 
 
-descdist(venta_usaStore_tablets, boot=1000)
+#descdist(venta_usaStore_tablets, boot=1000)
 
 ```
+
 Como se puede observar en el diagrama de cullen and frey se tiene que los ajustes de distribución que mas puede ir con el modelo son "lognormal", "weibull" y "gamma"
 
 Vamos a validar cual de los tres puede ajustarse mas :
@@ -733,16 +735,248 @@ Según la data que se tiene no contamos con variable dicotomicas
 
 
 
+# Series Temporales
+
+```{r include=FALSE}
+ventas <- usaStore$total
+unique(usaStore$order_date)
+str(usaStore$order_date)
+min(usaStore$order_date)
+max(usaStore$order_date)
+```
+
+
+```{r include=FALSE}
+
+usaStore<- usaStore[!(usaStore$order_date == ""),]
+
+```
+
+Relizamosla visualizacion de Datos en Cuartiles para conseguir los modelos en base a dicha serie de tiempo
+
+```{r}
+ventas.usa = ts(ventas, start = c(2020,1),end = c(2021,4),frequency = 4)
+print(ventas.usa)
+start(ventas.usa);end(ventas.usa)
+
+```
+
+Para conocer el detalle de los valores en los cuatrimestres , realizamos un boxplot o diagrama de cajas para identificar la mediana y los datos atipicos dentro del total.
+
+```{r}
+boxplot(ventas.usa ~ cycle(ventas.usa))
+cycle(ventas.usa)
+```
+
+
+De acuerdo al bloxplot evidenciamos que la media para cada cuatrimestre es distinto y no se tiene valores atipicos en ninguno de ellos.
+
+A continuacion validamos la clase del modelo, para que tengamos la certeza de que las formulas del modelo se van ejecutar de manera correcta.*
+
+```{r}
+class(ventas.usa)
+```
+*La clase del modelo es correcta
+
+
+## Analisis  de Estacionariedad
+
+vamos a graficar la descomposicion Aditiva y multiplicaiva para el caso en analisis, esto para conocer las tendencias de los valores en el tiempo, su evolucíón temporal.
+
+### Modelo Aditivo
+
+```{r echo=FALSE}
+modeloAditivoUsa=decompose(ventas.usa)
+plot(modeloAditivoUsa)
+```
+
+
+### Modelo Multiplicativo
+
+```{r echo=FALSE}
+modelomultiUsa = decompose(ventas.usa, type = "mult")
+plot(modelomultiUsa)
+```
+De acuerdo a las tendencias de descomposicion Aditivas y Multiplicativas, en ambos casos la variación es muy similar, por ello vamos a realizar los modelos correctos para una predicción
+
+
+```{r eval=FALSE, include=FALSE}
+Tendencia = modelomultiUsa$trend
+print(Tendencia)
+
+```
+
+En los siguiente graficos muestra de otra manera la variación de los valores en el tiempo
+
+### Polar seasonal Plot
+
+```{r}
+ggseasonplot(ventas.usa, polar = TRUE) + 
+  ylab("Ventas") + ggtitle("Polar seasonal plot: Ventas India Store")
+
+```
+
+
+### Seasonal Plot
+
+```{r}
+autoplot(ventas.usa, ts.colour = "blue", ts.linetype = "dashed")
+```
+
+## Medidas de Autocorrelacion y Autocorrelacion Parcial
+
+Ejecutar estas medidas nos van a ayudar a identificar los valores de series pasadas que nos ayudarán a realizar los pronosicos futuros, asi mismo determinar el orden de los procesos en un modelo ARIMA (p = Orden de Auto-regresion ,d = Orden de Integracion, q = Orden de media movil)
+
+### Autocorrelación*
+
+Identficación número de Autoregresivos
+
+```{r}
+autoplot(acf(ventas.usa, plot = FALSE))
+```
+### Autocorrelacion Parcial
+
+Identficación de número de  Autoregresivos
+
+```{r}
+autoplot(pacf(ventas.usa, plot = FALSE))
+```
 
 
 
 
+```{r include=FALSE}
+#autoplot(stl(ventas.usa, s.window = "periodic"), ts.colour = "blue")
+```
+
+Para identificar que modelo es el correcto, realizaremoss primero el analisis con diferencias.
+
+Validamos con Diff la estacionariedad 
+
+### Evaluación Dickey Fuller  test
+```{r}
+diff.ventasu=diff(ventas.usa)
+adf.test(diff.ventasu)
+```
+
+Los resultados del test muestran p-value mayor a 0.05 por lo tanto no es estacionaria, entonces no podemos hacer monosticos con el modelo de diferencias.
+
+Graficamos el modelo con las diferencias, para evidenciar la prueba antes realizada.
+
+```{r}
+diff.ventasUsa<-autoplot(diff(ventas.usa), ts.linetype = "dashed", ts.colour = "darkmagenta")
+diff.ventasUsa
+```
+
+Rechazamos el modelo y proseguimos a realizar el modelo logaritmico 
+
+
+### Modelo con Logaritmo
+
+```{r}
+serielogUsa=log(ventas.usa)
+serielogUsa
+```
+
+```{r}
+plot(serielogUsa)
+adf.test(serielogUsa,alternative = "stationary")
+```
+
+
+```{r}
+#Autocorrelacion / Numero de medias moviles
+acf(serielogUsa)
+```
+
+
+
+```{r}
+#Autocorrelacion Parcial / numero de autoregresivos
+pacf(serielogUsa)
+```
+
+
+```{r}
+# Las frecuencias de la serie tienen que ser igual a los resagos para ello se usa la siguiente funcion. 
+acf(ts(serielogUsa, frequency = 1))
+```
 
 
 
 
+```{r}
+pacf(serielogUsa, frequency=1)
+```
+
+Aplicamos el Modelo Arima, ya que tenemos el modelo estacional
+
+1 autoregresivos 
+0 diferencia 
+0 media movil
+```{r}
+modelo1Usa = arima(ventas.usa,order = c(1,0,0))
+modelo1Usa
+```
 
 
 
+validamos si el modelo es bueno
+```{r}
+tsdiag(modelo1Usa)
+```
 
+
+Validamos que sí hay ruido blanco ya que el P value es mayor a 0.05
+
+```{r}
+Box.test(residuals(modelo1Usa), type = "Ljung-Box")
+```
+
+
+### Graficamos los errores residuales
+
+```{r}
+errorUsa=residuals(modelo1Usa)
+plot(errorUsa)
+```
+
+### Pronostico de proyección
+
+```{r}
+pronosticoUsa<- forecast::forecast(modelo1Usa, h = 10)
+pronosticoUsa
+```
+
+
+```{r}
+plot(pronosticoUsa)
+```
+
+Concluimos en que el pronostico ARIMA con 1 Autocorregresivo, 0 diferencias y 0 medias moviles. Y se da como resultado que la tendencia en nuestro pronostico es constante. 
+
+
+# Teorema de Bayes
+
+Probabilidad de que se compre segun el sexo y la cuidad
+
+
+```{r}
+library(naivebayes)
+library(dplyr)
+library(ggplot2)
+library(psych)
+```
+
+Visualización
+
+
+```{r}
+help("pairs.panels")
+```
+
+
+```{r}
+pairs.panels(usaStore[-1])
+```
 
