@@ -1,0 +1,195 @@
+---
+title: "Teorema de Bayes"
+author: "Antuane"
+date: '2022-09-04'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r include=FALSE}
+  library(MASS)
+  library(viridis)
+  library(tables)
+  library(Hmisc)
+  library(kableExtra)
+  library(knitr,stargazer)
+  library(dataMaid,tidylog)
+  library(reporttools)
+  library(dplyr, warn.conflicts = FALSE)
+  library(reporttools,summarytools)
+  library(metan,dplyr , warn.conflicts = FALSE)
+  library(flextable, DT)
+  library(dplyr)
+  library(RcmdrMisc)
+  library(webr,expss)
+  library(descr)
+  library(summarytools)
+  library(fitdistrplus)
+  library(survival)
+  library(npsurv)
+  library(lsei)
+  library(readr)
+  library(rriskDistributions)
+  library(xts)
+  library(zoo)
+  library(tidyverse)
+  library(lubridate)
+  library(tseries)
+  library(astsa)
+  library(forecast)
+  library(foreign)
+  library(timsac)
+  library(vars)
+  library(mFilter)
+  library(dynlm)
+  library(MASS)
+  library(ggfortify)
+  library(readxl)
+  library(corrplot)
+```
+
+
+
+
+```{r}
+L02 <- "D:/TFE/EDA_of_Sales_USA/"
+usaStore <- read.csv(paste(L02,"clean_sales.csv",sep=""), header = TRUE, sep = ",")
+str(usaStore)
+View(usaStore)
+```
+
+
+# Data 
+
+
+```{r}
+DataBayes <- usaStore[names(usaStore) %in% c("status", "total", "Gender","age","Region")]
+```
+
+
+
+
+```{r}
+DataBayes <- DataBayes%>%group_by(total)%>%filter(status %in% c("canceled","complete"))
+
+view(DataBayes)
+
+```
+
+```{r}
+str(DataBayes)
+DataBayes$status <- as.factor(DataBayes$status)
+DataBayes$Gender <- as.factor(DataBayes$Gender)
+DataBayes$Region <- as.factor(DataBayes$Region)
+```
+
+#Visualización
+
+
+```{r}
+library(naivebayes)
+library(dplyr)
+library(ggplot2)
+install.packages("psych", repos = "https://personality-project.org/r/", type="source")
+library(psych)
+```
+
+
+```{r}
+library(psych)
+pairs.panels(DataBayes[,-5], 
+             method = "pearson", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+             )
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+DataBayes%>%
+  ggplot(aes(x=status, y=Gender, fill=status))+ geom_boxplot()+ ggtitle("Box plot")
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+DataBayes%>%
+  ggplot(aes(x=status, y=Region, fill=status),size=100)+ geom_boxplot()+ ggtitle("Box plot")
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+DataBayes%>%
+  ggplot(aes(x=status, y=total, fill=status))+ geom_boxplot()+ ggtitle("Box plot")
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+DataBayes%>%
+  ggplot(aes(x=total, fill=status))+ geom_density(alpha= 10000, color="black")+ ggtitle("Density Plot")
+
+
+
+```
+
+# Data Partition
+
+
+```{r}
+set.seed(1234)
+ind <- sample(2, nrow(DataBayes),replace=T, prob = c(0.8,0.2))
+train <- DataBayes[ind==1,]
+test <- DataBayes[ind==2,]
+```
+
+#Naive Bayes Model
+```{r}
+library(naivebayes)
+model<- naive_bayes(status ~., data = train, usekernel = T)
+model
+```
+
+
+```{r}
+library(dplyr)
+train %>% filter(status =='1')  %>%
+  summarise(mean(total),sd(total))
+  
+plot(model)
+```
+
+#Predict
+
+
+```{r}
+p <- predict(model, train, type= "prob")
+head(cbind(p,train))
+```
+
+# Confusion Matrix - train  Data
+
+
+```{r}
+p1 <- predict(model, train)
+(tab1<- table(p1,train$status))
+1- sum(diag(tab1))/sum(tab1)
+```
+
+# Confusion Matrix - test  Data
+
+```{r}
+p2 <- predict(model, test)
+(tab2<- table(p2,test$status))
+1- sum(diag(tab2))/sum(tab2)
+```
+
